@@ -1,11 +1,11 @@
 //! Configuration system for LITHOS
 
-use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::{Arc, RwLock};
 use config::{Config, File, Environment};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use toml;
 
 #[derive(Error, Debug)]
 pub enum ConfigError {
@@ -13,6 +13,8 @@ pub enum ConfigError {
     Config(#[from] config::ConfigError),
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("TOML error: {0}")]
+    Toml(#[from] toml::ser::Error),
     #[error("Parse error: {0}")]
     Parse(String),
 }
@@ -335,7 +337,7 @@ impl ConfigManager {
         let mut builder = Config::builder();
 
         // Default values
-        builder = builder.add_source(config::Config::try_from(AppConfig::default())?);
+        builder = builder.add_source(config::Config::try_from(&AppConfig::default())?);
 
         // Config file
         if path.exists() {

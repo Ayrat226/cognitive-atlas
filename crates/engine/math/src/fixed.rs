@@ -577,12 +577,6 @@ impl FixedAABB {
     }
 }
 
-impl fmt::Debug for FixedVec3 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "FixedVec3({:?}, {:?}, {:?})", self.x, self.y, self.z)
-    }
-}
-
 impl fmt::Debug for FixedAABB {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "FixedAABB(min: {:?}, max: {:?})", self.min, self.max)

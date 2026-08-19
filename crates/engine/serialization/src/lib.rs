@@ -3,7 +3,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 use bytemuck::{Pod, Zeroable, cast_slice, cast_slice_mut};
-use crate::lithos_engine_memory::GLOBAL_STATS;
+use lithos_engine_memory::GLOBAL_STATS;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -43,7 +43,7 @@ impl TypeId {
 }
 
 /// Schema definition for a type
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Schema {
     pub type_id: TypeId,
     pub name: String,

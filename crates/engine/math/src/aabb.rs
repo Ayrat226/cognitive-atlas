@@ -60,8 +60,8 @@ impl AABB {
     #[inline]
     pub fn ray_intersect(&self, origin: Vec3, dir: Vec3) -> Option<(f32, f32)> {
         let inv_dir = Vec3::new(1.0 / dir.x, 1.0 / dir.y, 1.0 / dir.z);
-        let t1 = (self.min - origin) * inv_dir;
-        let t2 = (self.max - origin) * inv_dir;
+        let t1 = (self.min - origin).mul_vec(inv_dir);
+        let t2 = (self.max - origin).mul_vec(inv_dir);
         let t_min = t1.min(t2);
         let t_max = t1.max(t2);
         let t_enter = t_min.x.max(t_min.y).max(t_min.z);

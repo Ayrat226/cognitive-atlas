@@ -3,8 +3,8 @@
 use std::path::PathBuf;
 use clap::Parser;
 use tracing::{info, error, warn};
-use lithos_engine_config::{AppConfig, ConfigManager};
-use lithos_engine_window::{run_app, EngineConfig};
+use lithos_engine_config::{AppConfig, ConfigManager, EngineConfig};
+use lithos_engine_window::run_app;
 
 #[derive(Parser, Debug)]
 #[command(name = "lithos", version, about = "LITHOS - Voxel Planetary Simulation")]

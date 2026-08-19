@@ -99,6 +99,8 @@ impl Vec3 {
     pub fn max(self, other: Self) -> Self { Self::new(self.x.max(other.x), self.y.max(other.y), self.z.max(other.z)) }
     #[inline]
     pub fn clamp(self, min: Self, max: Self) -> Self { Self::new(self.x.clamp(min.x, max.x), self.y.clamp(min.y, max.y), self.z.clamp(min.z, max.z)) }
+    #[inline]
+    pub fn mul_vec(self, other: Self) -> Self { Self::new(self.x * other.x, self.y * other.y, self.z * other.z) }
 }
 
 impl Add for Vec3 { type Output = Self; #[inline] fn add(self, rhs: Self) -> Self { Self::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z) } }

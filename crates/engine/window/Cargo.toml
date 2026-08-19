@@ -16,3 +16,4 @@ thiserror = { workspace = true }
 lithos-engine-memory = { path = "../memory" }
 lithos-engine-logging = { path = "../logging" }
 lithos-engine-profiler = { path = "../profiler" }
+lithos-engine-config = { path = "../config" }

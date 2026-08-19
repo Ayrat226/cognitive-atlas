@@ -12,8 +12,6 @@ crossbeam = { workspace = true }
 parking_lot = { workspace = true }
 tracing = { workspace = true }
 lithos-engine-memory = { path = "../memory" }
-tracy-client = { version = "0.17", optional = true }
 
 [features]
 default = []
-profiling = ["tracy-client"]

@@ -1,68 +1,36 @@
 //! Profiling integration with Tracy
 
-#[cfg(feature = "tracy")]
-use tracy_client::{span, Zone, plot, message};
-
 /// Profiler interface
 pub struct Profiler;
 
 impl Profiler {
     /// Initialize profiler
     pub fn init() {
-        #[cfg(feature = "tracy")]
-        {
-            // Tracy client auto-initializes on first use
-        }
         tracing::info!("Profiler initialized");
     }
 
     /// Begin a profiling zone
     #[inline]
-    pub fn begin_zone(name: &'static str) -> Option<ProfilerZone> {
-        #[cfg(feature = "tracy")]
-        {
-            let zone = Zone::begin(name);
-            Some(ProfilerZone { zone: Some(zone) })
-        }
-        #[cfg(not(feature = "tracy"))]
-        {
-            None
-        }
+    pub fn begin_zone(_name: &'static str) -> Option<ProfilerZone> {
+        None
     }
 
     /// Plot a value
     #[inline]
-    pub fn plot(name: &'static str, value: f64) {
-        #[cfg(feature = "tracy")]
-        {
-            plot(name, value);
-        }
+    pub fn plot(_name: &'static str, _value: f64) {
     }
 
     /// Send a message
     #[inline]
-    pub fn message(text: &str) {
-        #[cfg(feature = "tracy")]
-        {
-            message(text);
-        }
+    pub fn message(_text: &str) {
     }
 }
 
 /// RAII profiling zone
-pub struct ProfilerZone {
-    #[cfg(feature = "tracy")]
-    zone: Option<tracy_client::Zone<'static>>,
-}
+pub struct ProfilerZone;
 
 impl Drop for ProfilerZone {
     fn drop(&mut self) {
-        #[cfg(feature = "tracy")]
-        {
-            if let Some(zone) = self.zone.take() {
-                zone.end();
-            }
-        }
     }
 }
 
@@ -70,9 +38,6 @@ impl Drop for ProfilerZone {
 #[macro_export]
 macro_rules! profile_fn {
     () => {
-        #[cfg(feature = "tracy")]
-        let _zone = $crate::lithos_engine_profiler::Profiler::begin_zone(module_path!());
-        #[cfg(not(feature = "tracy"))]
         let _zone: Option<$crate::lithos_engine_profiler::ProfilerZone> = None;
     };
 }
@@ -81,9 +46,6 @@ macro_rules! profile_fn {
 #[macro_export]
 macro_rules! profile_scope {
     ($name:expr) => {
-        #[cfg(feature = "tracy")]
-        let _zone = $crate::lithos_engine_profiler::Profiler::begin_zone($name);
-        #[cfg(not(feature = "tracy"))]
         let _zone: Option<$crate::lithos_engine_profiler::ProfilerZone> = None;
     };
 }
@@ -92,7 +54,7 @@ macro_rules! profile_scope {
 #[macro_export]
 macro_rules! profile_plot {
     ($name:expr, $value:expr) => {
-        $crate::lithos_engine_profiler::Profiler::plot($name, $value as f64);
+        // No-op when tracy not enabled
     };
 }
 
@@ -100,7 +62,7 @@ macro_rules! profile_plot {
 #[macro_export]
 macro_rules! profile_message {
     ($text:expr) => {
-        $crate::lithos_engine_profiler::Profiler::message($text);
+        // No-op when tracy not enabled
     };
 }
 
@@ -134,8 +96,8 @@ impl FrameProfiler {
 
     pub fn end_frame(&mut self) {
         let frame_time = self.frame_start.elapsed();
-        self.plot("frame.time_ms", frame_time.as_secs_f64() * 1000.0);
-        self.plot("frame.number", self.frame_number as f64);
+        // Profiling disabled
+        let _ = frame_time;
     }
 
     pub fn begin_zone(&mut self, name: &'static str) -> FrameZoneGuard {
@@ -143,13 +105,6 @@ impl FrameProfiler {
         let idx = self.zones.len();
         self.zones.push(zone);
         FrameZoneGuard { profiler: self, idx }
-    }
-
-    fn plot(&self, name: &'static str, value: f64) {
-        #[cfg(feature = "tracy")]
-        {
-            tracy_client::plot(name, value);
-        }
     }
 }
 
@@ -161,13 +116,6 @@ pub struct FrameZoneGuard<'a> {
 
 impl<'a> Drop for FrameZoneGuard<'a> {
     fn drop(&mut self) {
-        self.profiler.zones[self.idx].end = Some(std::time::Instant::now());
-        let zone = &self.profiler.zones[self.idx];
-        let elapsed = zone.end.unwrap().duration_since(zone.start).as_secs_f64() * 1000.0;
-        #[cfg(feature = "tracy")]
-        {
-            tracy_client::plot(zone.name, elapsed);
-        }
     }
 }
 

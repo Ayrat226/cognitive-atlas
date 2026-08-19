@@ -5,15 +5,15 @@ use winit::{
     application::ApplicationHandler,
     event::{WindowEvent, DeviceEvent, KeyEvent, ElementState},
     event_loop::{ActiveEventLoop, EventLoop},
-    window::{Window, WindowAttributes, WindowId},
+    window::{Window as WinitWindow, WindowAttributes, WindowId},
     keyboard::{KeyCode, PhysicalKey},
     dpi::{LogicalSize, PhysicalSize},
 };
 use raw_window_handle::{HasWindowHandle, HasDisplayHandle};
-use crate::lithos_engine_memory::GLOBAL_STATS;
-use crate::lithos_engine_logging::{LoggingConfig, init as init_logging, console};
-use crate::lithos_engine_profiler::Profiler;
-use crate::lithos_engine_config::{EngineConfig, WindowConfig};
+use lithos_engine_memory::GLOBAL_STATS;
+use lithos_engine_logging::{LoggingConfig, init as init_logging};
+use lithos_engine_profiler::Profiler;
+use lithos_engine_config::{EngineConfig, WindowConfig};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -28,7 +28,7 @@ pub enum WindowError {
 
 /// Window state
 pub struct WindowState {
-    pub window: Arc<Window>,
+    pub window: Arc<WinitWindow>,
     pub config: WindowConfig,
     pub size: PhysicalSize<u32>,
     pub frame_count: u64,
@@ -40,7 +40,7 @@ pub struct WindowState {
 
 impl WindowState {
     pub fn new(event_loop: &ActiveEventLoop, config: &WindowConfig) -> Result<Self, WindowError> {
-        let mut attrs = WindowAttributes::default()
+        let attrs = WindowAttributes::default()
             .with_title(&config.title)
             .with_inner_size(LogicalSize::new(config.width, config.height))
             .with_resizable(config.resizable)
@@ -167,11 +167,9 @@ impl ApplicationHandler for AppHandler {
             }
             WindowEvent::Resized(size) => {
                 window.resize(size);
-                // Notify renderer of resize
             }
             WindowEvent::RedrawRequested => {
                 window.frame_count += 1;
-                // Frame rendering happens here
             }
             WindowEvent::Focused(focused) => {
                 window.focused = focused;
@@ -202,7 +200,7 @@ impl ApplicationHandler for AppHandler {
         }
     }
 
-    fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
+    fn about_to_wait(&mut self, _event_loop: &ActiveEventLoop) {
         if let Some(window) = &self.window_state {
             window.window.request_redraw();
         }
@@ -211,7 +209,6 @@ impl ApplicationHandler for AppHandler {
 
 /// Run the application
 pub fn run_app(config: EngineConfig) -> Result<(), WindowError> {
-    // Initialize subsystems
     init_logging(LoggingConfig::default());
     Profiler::init();
 
@@ -224,28 +221,20 @@ pub fn run_app(config: EngineConfig) -> Result<(), WindowError> {
 }
 
 /// High-level window wrapper for integration with Vulkan
-pub struct Window {
+pub struct LithosWindow {
     pub state: WindowState,
     pub surface: Option<ash::vk::SurfaceKHR>,
 }
 
-impl Window {
-    pub fn new(event_loop: &ActiveEventLoop, config: &WindowConfig, instance: &ash::Instance) -> Result<Self, WindowError> {
+impl LithosWindow {
+    pub fn new(event_loop: &ActiveEventLoop, config: &WindowConfig, _instance: &ash::Instance) -> Result<Self, WindowError> {
         let state = WindowState::new(event_loop, config)?;
 
-        // Create Vulkan surface
-        let surface = unsafe {
-            ash_window::create_surface(
-                instance,
-                state.window.window_handle().unwrap().as_raw(),
-                state.window.display_handle().unwrap().as_raw(),
-                None,
-            )
-        }.map_err(|e| WindowError::SurfaceCreation(e.to_string()))?;
-
+        // Vulkan surface creation is platform-specific and will be implemented separately
+        // For now, return a window without a surface
         Ok(Self {
             state,
-            surface: Some(surface),
+            surface: None,
         })
     }
 
@@ -266,13 +255,13 @@ impl Window {
     }
 }
 
-impl HasWindowHandle for Window {
+impl HasWindowHandle for LithosWindow {
     fn window_handle(&self) -> Result<raw_window_handle::WindowHandle<'_>, raw_window_handle::HandleError> {
         self.state.window.window_handle()
     }
 }
 
-impl HasDisplayHandle for Window {
+impl HasDisplayHandle for LithosWindow {
     fn display_handle(&self) -> Result<raw_window_handle::DisplayHandle<'_>, raw_window_handle::HandleError> {
         self.state.window.display_handle()
     }

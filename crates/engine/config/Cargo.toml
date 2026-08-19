@@ -11,4 +11,6 @@ rust-version = { workspace = true }
 config = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+num_cpus = "1.16"
+toml = { workspace = true }
 lithos-engine-memory = { path = "../memory" }
