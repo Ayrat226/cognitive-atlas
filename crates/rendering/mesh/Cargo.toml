@@ -8,6 +8,7 @@ authors = { workspace = true }
 rust-version = { workspace = true }
 
 [dependencies]
+ash = { workspace = true }
 bytemuck = { workspace = true }
 parking_lot = { workspace = true }
 thiserror = { workspace = true }
@@ -15,5 +16,6 @@ lithos-engine-memory = { path = "../../engine/memory" }
 lithos-engine-math = { path = "../../engine/math" }
 lithos-engine-serialization = { path = "../../engine/serialization" }
 lithos-engine-logging = { path = "../../engine/logging" }
+lithos-engine-profiler = { path = "../../engine/profiler" }
 lithos-simulation-voxel = { path = "../../simulation/voxel" }
 lithos-rendering-vulkan = { path = "../vulkan" }

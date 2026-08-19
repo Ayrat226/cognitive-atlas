@@ -2,7 +2,6 @@
 
 use std::sync::Arc;
 use ash::vk;
-use lithos_engine_memory::GLOBAL_STATS;
 use lithos_engine_profiler::Profiler;
 use thiserror::Error;
 
@@ -18,27 +17,27 @@ pub enum MeshError {
 
 /// Vertex structure for voxel meshes
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct MeshVertex {
-    pub position: [f32; 3],      // 12 bytes
-    pub normal: [f32; 3],        // 12 bytes  
-    pub uv: [f32; 2],            // 8 bytes
-    pub material_id: u32,        // 4 bytes
-    pub _padding: u32,           // 4 bytes (align to 32 bytes)
+    pub position: [f32; 3],
+    pub normal: [f32; 3],
+    pub uv: [f32; 2],
+    pub material_id: u32,
+    pub _padding: u32,
 }
 
 /// Instance data for instanced rendering
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct InstanceData {
-    pub model_matrix: [[f32; 4]; 4],  // 64 bytes
-    pub material_id: u32,             // 4 bytes
-    pub _padding: [u32; 3],           // 12 bytes
+    pub model_matrix: [[f32; 4]; 4],
+    pub material_id: u32,
+    pub _padding: [u32; 3],
 }
 
 /// Draw command for indirect rendering
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct DrawIndexedIndirectCommand {
     pub index_count: u32,
     pub instance_count: u32,
@@ -74,68 +73,82 @@ pub struct MeshPipeline {
 
 impl MeshPipeline {
     pub fn new(device: Arc<ash::Device>, descriptor_pool: vk::DescriptorPool) -> Result<Self, MeshError> {
-        let vertex_input_binding = vk::VertexInputBindingDescription::default()
-            .binding(0)
-            .stride(std::mem::size_of::<MeshVertex>() as u32)
-            .input_rate(vk::VertexInputRate::VERTEX);
+        let vertex_input_binding = vk::VertexInputBindingDescription {
+            binding: 0,
+            stride: std::mem::size_of::<MeshVertex>() as u32,
+            input_rate: vk::VertexInputRate::VERTEX,
+        };
 
         let vertex_input_attributes = [
-            vk::VertexInputAttributeDescription::default()
-                .binding(0)
-                .location(0)
-                .format(vk::Format::R32G32B32_SFLOAT)
-                .offset(0),                              // position
-            vk::VertexInputAttributeDescription::default()
-                .binding(0)
-                .location(1)
-                .format(vk::Format::R32G32B32_SFLOAT)
-                .offset(12),                             // normal
-            vk::VertexInputAttributeDescription::default()
-                .binding(0)
-                .location(2)
-                .format(vk::Format::R32G32_SFLOAT)
-                .offset(24),                             // uv
-            vk::VertexInputAttributeDescription::default()
-                .binding(0)
-                .location(3)
-                .format(vk::Format::R32_UINT)
-                .offset(32),                             // material_id
+            vk::VertexInputAttributeDescription {
+                binding: 0,
+                location: 0,
+                format: vk::Format::R32G32B32_SFLOAT,
+                offset: 0,
+            },
+            vk::VertexInputAttributeDescription {
+                binding: 0,
+                location: 1,
+                format: vk::Format::R32G32B32_SFLOAT,
+                offset: 12,
+            },
+            vk::VertexInputAttributeDescription {
+                binding: 0,
+                location: 2,
+                format: vk::Format::R32G32_SFLOAT,
+                offset: 24,
+            },
+            vk::VertexInputAttributeDescription {
+                binding: 0,
+                location: 3,
+                format: vk::Format::R32_UINT,
+                offset: 32,
+            },
         ];
 
-        // Create descriptor set layout
-        let binding = vk::DescriptorSetLayoutBinding::default()
-            .binding(0)
-            .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
-            .descriptor_count(1)
-            .stage_flags(vk::ShaderStageFlags::VERTEX);
+        let binding = vk::DescriptorSetLayoutBinding {
+            binding: 0,
+            descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
+            descriptor_count: 1,
+            stage_flags: vk::ShaderStageFlags::VERTEX,
+            p_immutable_samplers: std::ptr::null(),
+        };
 
-        let layout_info = vk::DescriptorSetLayoutCreateInfo::default()
-            .bindings(std::slice::from_ref(&binding));
+        let layout_info = vk::DescriptorSetLayoutCreateInfo {
+            binding_count: 1,
+            p_bindings: &binding,
+            ..Default::default()
+        };
 
-        let descriptor_set_layout = unsafe { device.create_descriptor_set_layout(&layout_info, None) }?;
+        let descriptor_set_layout = unsafe { device.create_descriptor_set_layout(&layout_info, None)? };
 
-        // Create pipeline layout
-        let push_constant_range = vk::PushConstantRange::default()
-            .stage_flags(vk::ShaderStageFlags::VERTEX | vk::ShaderStageFlags::FRAGMENT)
-            .offset(0)
-            .size(128);  // Model matrix + material params
+        let push_constant_range = vk::PushConstantRange {
+            stage_flags: vk::ShaderStageFlags::VERTEX | vk::ShaderStageFlags::FRAGMENT,
+            offset: 0,
+            size: 128,
+        };
 
-        let pipeline_layout_info = vk::PipelineLayoutCreateInfo::default()
-            .set_layouts(std::slice::from_ref(&descriptor_set_layout))
-            .push_constant_ranges(std::slice::from_ref(&push_constant_range));
+        let pipeline_layout_info = vk::PipelineLayoutCreateInfo {
+            set_layout_count: 1,
+            p_set_layouts: &descriptor_set_layout,
+            push_constant_range_count: 1,
+            p_push_constant_ranges: &push_constant_range,
+            ..Default::default()
+        };
 
-        let pipeline_layout = unsafe { device.create_pipeline_layout(&pipeline_layout_info, None) }?;
+        let pipeline_layout = unsafe { device.create_pipeline_layout(&pipeline_layout_info, None)? };
 
-        // Create graphics pipeline (will be fully configured later with shaders)
         let pipeline = vk::Pipeline::null();
 
-        // Allocate descriptor sets
-        let set_layouts = vec![descriptor_set_layout; 3]; // frames in flight
-        let alloc_info = vk::DescriptorSetAllocateInfo::default()
-            .descriptor_pool(descriptor_pool)
-            .set_layouts(&set_layouts);
+        let set_layouts = vec![descriptor_set_layout; 3];
+        let alloc_info = vk::DescriptorSetAllocateInfo {
+            descriptor_pool,
+            descriptor_set_count: 3,
+            p_set_layouts: set_layouts.as_ptr(),
+            ..Default::default()
+        };
 
-        let descriptor_sets = unsafe { device.allocate_descriptor_sets(&alloc_info) }?;
+        let descriptor_sets = unsafe { device.allocate_descriptor_sets(&alloc_info)? };
 
         Ok(Self {
             device,
@@ -160,40 +173,40 @@ impl MeshPipeline {
         let index_size = (indices.len() * std::mem::size_of::<u32>()) as vk::DeviceSize;
         let indirect_size = (commands.len() * std::mem::size_of::<DrawIndexedIndirectCommand>()) as vk::DeviceSize;
 
-        // Create buffers
-        let vertex_buffer_info = vk::BufferCreateInfo::default()
-            .size(vertex_size)
-            .usage(vk::BufferUsageFlags::VERTEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::STORAGE_BUFFER)
-            .sharing_mode(vk::SharingMode::EXCLUSIVE);
+        let vertex_buffer_info = vk::BufferCreateInfo {
+            size: vertex_size,
+            usage: vk::BufferUsageFlags::VERTEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::STORAGE_BUFFER,
+            sharing_mode: vk::SharingMode::EXCLUSIVE,
+            ..Default::default()
+        };
 
-        let index_buffer_info = vk::BufferCreateInfo::default()
-            .size(index_size)
-            .usage(vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST)
-            .sharing_mode(vk::SharingMode::EXCLUSIVE);
+        let index_buffer_info = vk::BufferCreateInfo {
+            size: index_size,
+            usage: vk::BufferUsageFlags::INDEX_BUFFER | vk::BufferUsageFlags::TRANSFER_DST,
+            sharing_mode: vk::SharingMode::EXCLUSIVE,
+            ..Default::default()
+        };
 
-        let indirect_buffer_info = vk::BufferCreateInfo::default()
-            .size(indirect_size)
-            .usage(vk::BufferUsageFlags::INDIRECT_BUFFER | vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::STORAGE_BUFFER)
-            .sharing_mode(vk::SharingMode::EXCLUSIVE);
+        let indirect_buffer_info = vk::BufferCreateInfo {
+            size: indirect_size,
+            usage: vk::BufferUsageFlags::INDIRECT_BUFFER | vk::BufferUsageFlags::TRANSFER_DST | vk::BufferUsageFlags::STORAGE_BUFFER,
+            sharing_mode: vk::SharingMode::EXCLUSIVE,
+            ..Default::default()
+        };
 
-        let vertex_buffer = unsafe { device.create_buffer(&vertex_buffer_info, None) }?;
-        let index_buffer = unsafe { device.create_buffer(&index_buffer_info, None) }?;
-        let indirect_buffer = unsafe { device.create_buffer(&indirect_buffer_info, None) }?;
+        let vertex_buffer = unsafe { device.create_buffer(&vertex_buffer_info, None)? };
+        let index_buffer = unsafe { device.create_buffer(&index_buffer_info, None)? };
+        let indirect_buffer = unsafe { device.create_buffer(&indirect_buffer_info, None)? };
 
-        // Allocate memory (simplified - would use proper allocator in practice)
         let vertex_buffer_memory = Self::allocate_buffer_memory(device, memory_properties, vertex_buffer, vk::MemoryPropertyFlags::DEVICE_LOCAL)?;
         let index_buffer_memory = Self::allocate_buffer_memory(device, memory_properties, index_buffer, vk::MemoryPropertyFlags::DEVICE_LOCAL)?;
         let indirect_buffer_memory = Self::allocate_buffer_memory(device, memory_properties, indirect_buffer, vk::MemoryPropertyFlags::DEVICE_LOCAL)?;
 
-        // Bind memory
         unsafe {
             device.bind_buffer_memory(vertex_buffer, vertex_buffer_memory, 0)?;
             device.bind_buffer_memory(index_buffer, index_buffer_memory, 0)?;
             device.bind_buffer_memory(indirect_buffer, indirect_buffer_memory, 0)?;
         }
-
-        // Upload data (would use staging buffer in practice)
-        // ... upload vertices, indices, commands ...
 
         Ok(ChunkMeshBuffers {
             vertex_buffer,
@@ -217,11 +230,13 @@ impl MeshPipeline {
         let requirements = unsafe { device.get_buffer_memory_requirements(buffer) };
         let memory_type_index = Self::find_memory_type(memory_properties, requirements.memory_type_bits, flags)?;
         
-        let alloc_info = vk::MemoryAllocateInfo::default()
-            .allocation_size(requirements.size)
-            .memory_type_index(memory_type_index);
+        let alloc_info = vk::MemoryAllocateInfo {
+            allocation_size: requirements.size,
+            memory_type_index,
+            ..Default::default()
+        };
 
-        let memory = unsafe { device.allocate_memory(&alloc_info, None) }?;
+        let memory = unsafe { device.allocate_memory(&alloc_info, None)? };
         Ok(memory)
     }
 
@@ -250,7 +265,7 @@ impl MeshPipeline {
     ) {
         unsafe {
             self.device.cmd_bind_pipeline(command_buffer, vk::PipelineBindPoint::GRAPHICS, pipeline);
-            self.device.cmd_bind_vertex_buffers(command_buffer, 0, std::slice::from_ref(&vertex_buffer), &[0]);
+            self.device.cmd_bind_vertex_buffers(command_buffer, 0, &[vertex_buffer], &[0]);
             self.device.cmd_bind_index_buffer(command_buffer, index_buffer, 0, vk::IndexType::UINT32);
             self.device.cmd_draw_indexed_indirect(command_buffer, indirect_buffer, 0, draw_count, std::mem::size_of::<DrawIndexedIndirectCommand>() as u32);
         }
@@ -269,7 +284,7 @@ impl Drop for MeshPipeline {
 
 /// GPU-driven culling compute shader data
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct CullingConstants {
     pub view_proj: [[f32; 4]; 4],
     pub camera_pos: [f32; 3],
@@ -290,48 +305,61 @@ pub struct CullingPipeline {
 
 impl CullingPipeline {
     pub fn new(device: Arc<ash::Device>) -> Result<Self, MeshError> {
-        // Descriptor set layout for culling
         let bindings = [
-            vk::DescriptorSetLayoutBinding::default()  // Indirect draw commands (storage buffer, read)
-                .binding(0)
-                .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
-                .descriptor_count(1)
-                .stage_flags(vk::ShaderStageFlags::COMPUTE),
-            vk::DescriptorSetLayoutBinding::default()  // Output indirect commands (storage buffer, write)
-                .binding(1)
-                .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
-                .descriptor_count(1)
-                .stage_flags(vk::ShaderStageFlags::COMPUTE),
-            vk::DescriptorSetLayoutBinding::default()  // Culling constants (uniform buffer)
-                .binding(2)
-                .descriptor_type(vk::DescriptorType::UNIFORM_BUFFER)
-                .descriptor_count(1)
-                .stage_flags(vk::ShaderStageFlags::COMPUTE),
-            vk::DescriptorSetLayoutBinding::default()  // AABB buffer (storage buffer, read)
-                .binding(3)
-                .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
-                .descriptor_count(1)
-                .stage_flags(vk::ShaderStageFlags::COMPUTE),
+            vk::DescriptorSetLayoutBinding {
+                binding: 0,
+                descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
+                descriptor_count: 1,
+                stage_flags: vk::ShaderStageFlags::COMPUTE,
+                p_immutable_samplers: std::ptr::null(),
+            },
+            vk::DescriptorSetLayoutBinding {
+                binding: 1,
+                descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
+                descriptor_count: 1,
+                stage_flags: vk::ShaderStageFlags::COMPUTE,
+                p_immutable_samplers: std::ptr::null(),
+            },
+            vk::DescriptorSetLayoutBinding {
+                binding: 2,
+                descriptor_type: vk::DescriptorType::UNIFORM_BUFFER,
+                descriptor_count: 1,
+                stage_flags: vk::ShaderStageFlags::COMPUTE,
+                p_immutable_samplers: std::ptr::null(),
+            },
+            vk::DescriptorSetLayoutBinding {
+                binding: 3,
+                descriptor_type: vk::DescriptorType::STORAGE_BUFFER,
+                descriptor_count: 1,
+                stage_flags: vk::ShaderStageFlags::COMPUTE,
+                p_immutable_samplers: std::ptr::null(),
+            },
         ];
 
-        let layout_info = vk::DescriptorSetLayoutCreateInfo::default()
-            .bindings(&bindings);
+        let layout_info = vk::DescriptorSetLayoutCreateInfo {
+            binding_count: 4,
+            p_bindings: bindings.as_ptr(),
+            ..Default::default()
+        };
 
-        let descriptor_set_layout = unsafe { device.create_descriptor_set_layout(&layout_info, None) }?;
+        let descriptor_set_layout = unsafe { device.create_descriptor_set_layout(&layout_info, None)? };
 
-        // Pipeline layout
-        let push_constant_range = vk::PushConstantRange::default()
-            .stage_flags(vk::ShaderStageFlags::COMPUTE)
-            .offset(0)
-            .size(std::mem::size_of::<CullingConstants>() as u32);
+        let push_constant_range = vk::PushConstantRange {
+            stage_flags: vk::ShaderStageFlags::COMPUTE,
+            offset: 0,
+            size: std::mem::size_of::<CullingConstants>() as u32,
+        };
 
-        let pipeline_layout_info = vk::PipelineLayoutCreateInfo::default()
-            .set_layouts(std::slice::from_ref(&descriptor_set_layout))
-            .push_constant_ranges(std::slice::from_ref(&push_constant_range));
+        let pipeline_layout_info = vk::PipelineLayoutCreateInfo {
+            set_layout_count: 1,
+            p_set_layouts: &descriptor_set_layout,
+            push_constant_range_count: 1,
+            p_push_constant_ranges: &push_constant_range,
+            ..Default::default()
+        };
 
-        let pipeline_layout = unsafe { device.create_pipeline_layout(&pipeline_layout_info, None) }?;
+        let pipeline_layout = unsafe { device.create_pipeline_layout(&pipeline_layout_info, None)? };
 
-        // Pipeline will be created with shader module
         let pipeline = vk::Pipeline::null();
 
         Ok(Self {
@@ -352,7 +380,7 @@ impl CullingPipeline {
     ) {
         unsafe {
             self.device.cmd_bind_pipeline(command_buffer, vk::PipelineBindPoint::COMPUTE, pipeline);
-            self.device.cmd_bind_descriptor_sets(command_buffer, vk::PipelineBindPoint::COMPUTE, self.pipeline_layout, 0, std::slice::from_ref(&descriptor_set), &[]);
+            self.device.cmd_bind_descriptor_sets(command_buffer, vk::PipelineBindPoint::COMPUTE, self.pipeline_layout, 0, &[descriptor_set], &[]);
             self.device.cmd_push_constants(command_buffer, self.pipeline_layout, vk::ShaderStageFlags::COMPUTE, 0, bytemuck::cast_slice(std::slice::from_ref(constants)));
             self.device.cmd_dispatch(command_buffer, workgroup_count, 1, 1);
         }

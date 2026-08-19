@@ -1891,10 +1891,12 @@ dependencies = [
 name = "lithos-rendering-mesh"
 version = "0.1.0"
 dependencies = [
+ "ash 0.37.3+1.3.251",
  "bytemuck",
  "lithos-engine-logging",
  "lithos-engine-math",
  "lithos-engine-memory",
+ "lithos-engine-profiler",
  "lithos-engine-serialization",
  "lithos-rendering-vulkan",
  "lithos-simulation-voxel",

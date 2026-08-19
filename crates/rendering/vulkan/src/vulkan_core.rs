@@ -45,7 +45,6 @@ pub const REQUIRED_DEVICE_EXTENSIONS: &[&CStr] = &[
     ash::extensions::khr::DynamicRendering::name(),
     ash::extensions::khr::Synchronization2::name(),
     ash::extensions::khr::BufferDeviceAddress::name(),
-    ash::extensions::ext::DescriptorIndexing::name(),
 ];
 
 /// Validation layers
@@ -194,8 +193,10 @@ impl VulkanContext {
 
         let create_info = vk::InstanceCreateInfo {
             p_application_info: &app_info,
-            enabled_extension_names: extension_names,
-            enabled_layer_names: enabled_layers,
+            enabled_extension_count: extension_names.len() as u32,
+            pp_enabled_extension_names: extension_names.as_ptr(),
+            enabled_layer_count: enabled_layers.len() as u32,
+            pp_enabled_layer_names: if enabled_layers.is_empty() { std::ptr::null() } else { enabled_layers.as_ptr() },
             ..Default::default()
         };
 
@@ -222,7 +223,6 @@ impl VulkanContext {
             ..Default::default()
         };
 
-        let debug_utils_loader = ash::extensions::ext::DebugUtils::new(entry, instance);
         let debug_messenger = unsafe { debug_utils_loader.create_debug_utils_messenger(&create_info, None)? };
 
         Ok((debug_utils_loader, debug_messenger))
@@ -337,7 +337,7 @@ impl VulkanContext {
         let mut features = vk::PhysicalDeviceFeatures::default();
         features.geometry_shader = 1;
         features.sampler_anisotropy = 1;
-        features.sample_rate_shading = 1;
+features.sample_rate_shading = 1;
 
         // Vk 1.3 features
         let mut features_13 = vk::PhysicalDeviceVulkan13Features {
@@ -353,51 +353,27 @@ impl VulkanContext {
             ..Default::default()
         };
 
-        // Descriptor indexing
-        let mut descriptor_indexing = vk::PhysicalDeviceDescriptorIndexingFeatures {
-            shader_sampled_image_array_non_uniform_indexing: 1,
-            descriptor_binding_variable_descriptor_count: 1,
-            descriptor_binding_partially_bound: 1,
-            runtime_descriptor_array: 1,
-            ..Default::default()
-        };
+        // Chain the feature structs: DeviceCreateInfo -> Vk13Features -> BufferDeviceAddressFeatures
+        buffer_device_address.p_next = std::ptr::null_mut();
+        features_13.p_next = &mut buffer_device_address as *mut _ as *mut std::ffi::c_void;
 
         let extension_names: Vec<*const c_char> = REQUIRED_DEVICE_EXTENSIONS
             .iter()
             .map(|s| s.as_ptr())
             .collect();
 
-        let mut layer_names = Vec::new();
-        if enable_validation {
-            for layer in VALIDATION_LAYERS {
-                layer_names.push(layer.as_ptr());
-            }
-        }
-
         let create_info = vk::DeviceCreateInfo {
             queue_create_info_count: queue_create_infos.len() as u32,
             p_queue_create_infos: queue_create_infos.as_ptr(),
             enabled_extension_count: extension_names.len() as u32,
             pp_enabled_extension_names: extension_names.as_ptr(),
-            enabled_layer_count: layer_names.len() as u32,
-            pp_enabled_layer_names: if layer_names.is_empty() { std::ptr::null() } else { layer_names.as_ptr() },
+            // Device layers are deprecated - use 0
+            enabled_layer_count: 0,
+            pp_enabled_layer_names: std::ptr::null(),
             p_enabled_features: &features,
-            p_next: &mut features_13 as *mut _ as *const _,
+            p_next: &mut features_13 as *mut _ as *mut std::ffi::c_void,
             ..Default::default()
         };
-
-        // Chain the feature structs
-        let mut features_13 = features_13;
-        let mut buffer_device_address = buffer_device_address;
-        let mut descriptor_indexing = descriptor_indexing;
-
-        // Chain: DeviceCreateInfo -> Vk13Features -> BufferDeviceAddressFeatures -> DescriptorIndexingFeatures
-        descriptor_indexing.p_next = std::ptr::null_mut();
-        buffer_device_address.p_next = &mut descriptor_indexing as *mut _ as *const _;
-        features_13.p_next = &mut buffer_device_address as *mut _ as *const _;
-        
-        let mut create_info = create_info;
-        create_info.p_next = &mut features_13 as *mut _ as *const _;
 
         let device = unsafe { instance.create_device(physical_device, &create_info, None)? };
         Ok(device)
@@ -705,7 +681,7 @@ impl FrameSync {
         unsafe {
             device.wait_for_fences(
                 &[self.in_flight_fences[self.current_frame]],
-                1,
+                true,
                 u64::MAX,
             )?;
         }
