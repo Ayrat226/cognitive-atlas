@@ -3,10 +3,18 @@
 use std::fmt;
 use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, Neg, Index, IndexMut};
 use bytemuck::{Pod, Zeroable};
+<<<<<<< ours
 
 /// 2D vector (f32)
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Pod, Zeroable)]
+=======
+use serde::{Serialize, Deserialize};
+
+/// 2D vector (f32)
+#[repr(C)]
+#[derive(Clone, Copy, PartialEq, Pod, Zeroable, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct Vec2 {
     pub x: f32,
     pub y: f32,
@@ -52,7 +60,11 @@ impl fmt::Debug for Vec2 { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Res
 
 /// 3D vector (f32)
 #[repr(C)]
+<<<<<<< ours
 #[derive(Clone, Copy, PartialEq, Pod, Zeroable)]
+=======
+#[derive(Clone, Copy, PartialEq, Pod, Zeroable, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct Vec3 {
     pub x: f32,
     pub y: f32,
@@ -100,6 +112,11 @@ impl Vec3 {
     #[inline]
     pub fn clamp(self, min: Self, max: Self) -> Self { Self::new(self.x.clamp(min.x, max.x), self.y.clamp(min.y, max.y), self.z.clamp(min.z, max.z)) }
     #[inline]
+<<<<<<< ours
+=======
+    pub const fn splat(v: f32) -> Self { Self::new(v, v, v) }
+    #[inline]
+>>>>>>> theirs
     pub fn mul_vec(self, other: Self) -> Self { Self::new(self.x * other.x, self.y * other.y, self.z * other.z) }
 }
 
@@ -119,7 +136,11 @@ impl fmt::Debug for Vec3 { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Res
 
 /// 4D vector (f32)
 #[repr(C)]
+<<<<<<< ours
 #[derive(Clone, Copy, PartialEq, Pod, Zeroable)]
+=======
+#[derive(Clone, Copy, PartialEq, Pod, Zeroable, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct Vec4 {
     pub x: f32,
     pub y: f32,
@@ -154,7 +175,11 @@ impl fmt::Debug for Vec4 { fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Res
 
 /// 3D vector (f64) for high-precision intermediate calculations
 #[repr(C)]
+<<<<<<< ours
 #[derive(Clone, Copy, PartialEq)]
+=======
+#[derive(Clone, Copy, PartialEq, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct Vec3d {
     pub x: f64,
     pub y: f64,

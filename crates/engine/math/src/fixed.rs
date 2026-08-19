@@ -7,11 +7,19 @@ use std::ops::{Add, AddAssign, Sub, SubAssign, Mul, MulAssign, Div, DivAssign, N
 use std::cmp::Ordering;
 use num_traits::{Zero, One, Num, Signed, Bounded, NumOps};
 use bytemuck::{Pod, Zeroable};
+<<<<<<< ours
+=======
+use serde::{Serialize, Deserialize};
+>>>>>>> theirs
 
 /// Fixed-point number with 11 fractional bits (Q52.11)
 /// 1 unit = 1/2048 meter ≈ 0.488 mm
 #[repr(transparent)]
+<<<<<<< ours
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Pod, Zeroable)]
+=======
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Pod, Zeroable, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct Fixed(i64);
 
 impl Fixed {
@@ -341,7 +349,11 @@ impl Bounded for Fixed {
 
 /// 3D vector with fixed-point components
 #[repr(C)]
+<<<<<<< ours
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Pod, Zeroable)]
+=======
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Pod, Zeroable, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct FixedVec3 {
     pub x: Fixed,
     pub y: Fixed,
@@ -498,7 +510,11 @@ impl fmt::Debug for FixedVec3 {
 
 /// 3D axis-aligned bounding box with fixed-point coordinates
 #[repr(C)]
+<<<<<<< ours
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Pod, Zeroable)]
+=======
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Pod, Zeroable, Serialize, Deserialize)]
+>>>>>>> theirs
 pub struct FixedAABB {
     pub min: FixedVec3,
     pub max: FixedVec3,
