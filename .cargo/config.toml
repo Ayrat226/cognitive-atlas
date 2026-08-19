@@ -3,21 +3,10 @@ target-dir = "target"
 jobs = 8
 
 [target.x86_64-unknown-linux-gnu]
-linker = "clang"
+linker = "/home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/bin/rust-lld"
 rustflags = [
-    "-C", "link-arg=-fuse-ld=lld",
     "-C", "target-cpu=native",
-]
-
-[target.aarch64-unknown-linux-gnu]
-linker = "clang"
-rustflags = [
-    "-C", "link-arg=-fuse-ld=lld",
-]
-
-[target.wasm32-unknown-unknown]
-rustflags = [
-    "-C", "target-feature=+bulk-memory,+mutable-globals,+sign-ext",
+    "-C", "link-arg=--library-path=/usr/lib/x86_64-linux-gnu",
 ]
 
 [profile.release]
