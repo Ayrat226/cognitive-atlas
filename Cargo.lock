@@ -2032,6 +2032,7 @@ dependencies = [
  "lithos-engine-memory",
  "lithos-engine-serialization",
  "parking_lot",
+ "serde",
  "thiserror 1.0.69",
 ]
 

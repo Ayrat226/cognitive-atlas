@@ -1,15 +1,3 @@
-<<<<<<< ours
-//! Placeholder module
-
-/// Unit tests
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn placeholder() {
-        assert!(true);
-    }
-}
-=======
 //! Voxel storage system for LITHOS
 //! Sparse hash map with procedural base, delta log, and LOD aggregation
 
@@ -21,6 +9,7 @@ pub mod storage;
 pub mod procedural;
 pub mod delta_log;
 pub mod lod;
+pub mod meshing;
 
 pub use coords::{RegionKey, ChunkKey, BlockPos, CHUNK_SIZE, REGION_SIZE};
 pub use block::BlockId;
@@ -30,4 +19,4 @@ pub use storage::VoxelStorage;
 pub use procedural::ProceduralGenerator;
 pub use delta_log::{DeltaLog, DeltaEntry};
 pub use lod::{LodAggregate, LodManager};
->>>>>>> theirs
+pub use meshing::{greedy_mesh_chunk, mesh_chunk_isolated, GreedyMesh, FaceDir, ChunkProvider, IsolatedChunkProvider};

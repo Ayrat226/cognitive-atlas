@@ -13,10 +13,7 @@ bytemuck = { workspace = true }
 parking_lot = { workspace = true }
 crossbeam = { workspace = true }
 thiserror = { workspace = true }
-<<<<<<< ours
-=======
 serde = { workspace = true }
->>>>>>> theirs
 lithos-engine-memory = { path = "../../engine/memory" }
 lithos-engine-jobs = { path = "../../engine/jobs" }
 lithos-engine-math = { path = "../../engine/math" }

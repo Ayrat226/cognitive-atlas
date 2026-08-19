@@ -3,18 +3,11 @@
 use std::fmt;
 use crate::Vec3;
 use bytemuck::{Pod, Zeroable};
-<<<<<<< ours
-
-/// 3D AABB (f32)
-#[repr(C)]
-#[derive(Clone, Copy, PartialEq, Pod, Zeroable)]
-=======
 use serde::{Serialize, Deserialize};
 
 /// 3D AABB (f32)
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Pod, Zeroable, Serialize, Deserialize)]
->>>>>>> theirs
 pub struct AABB {
     pub min: Vec3,
     pub max: Vec3,
@@ -51,16 +44,10 @@ impl AABB {
         self.max = self.max.max(point);
     }
     #[inline]
-<<<<<<< ours
-    pub fn merge(&mut self, other: &Self) {
-        self.min = self.min.min(other.min);
-        self.max = self.max.max(other.max);
-=======
     pub fn merge(&mut self, other: &Self) -> Self {
         self.min = self.min.min(other.min);
         self.max = self.max.max(other.max);
         *self
->>>>>>> theirs
     }
     #[inline]
     pub fn volume(&self) -> f32 {
