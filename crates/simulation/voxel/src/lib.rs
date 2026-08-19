@@ -10,6 +10,7 @@ pub mod procedural;
 pub mod delta_log;
 pub mod lod;
 pub mod meshing;
+pub mod collision;
 
 pub use coords::{RegionKey, ChunkKey, BlockPos, CHUNK_SIZE, REGION_SIZE};
 pub use block::BlockId;
@@ -20,3 +21,4 @@ pub use procedural::ProceduralGenerator;
 pub use delta_log::{DeltaLog, DeltaEntry};
 pub use lod::{LodAggregate, LodManager};
 pub use meshing::{greedy_mesh_chunk, mesh_chunk_isolated, GreedyMesh, FaceDir, ChunkProvider, IsolatedChunkProvider};
+pub use collision::{VoxelCollider, Capsule, CollisionResult, CollisionContact, is_on_ground, is_in_water, is_in_lava, get_block_at};
