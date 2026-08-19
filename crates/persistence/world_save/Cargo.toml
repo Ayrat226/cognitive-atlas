@@ -1,0 +1,18 @@
+[package]
+name = "lithos-persistence-world-save"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-serialization = { path = "../../engine/serialization" }
+lithos-simulation-voxel = { path = "../../simulation/voxel" }
+lithos-simulation-materials = { path = "../../simulation/materials" }
+lithos-simulation-aggregation = { path = "../../simulation/aggregation" }
+lithos-persistence-migration = { path = "../migration" }

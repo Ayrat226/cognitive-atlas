@@ -1,0 +1,23 @@
+[package]
+name = "lithos-engine-math"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+bytemuck = { workspace = true }
+nalgebra = { workspace = true }
+bitvec = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../memory" }
+num-traits = { version = "0.2" }
+proptest = { version = "1.3", optional = true }
+
+[features]
+default = []
+simd = []
+proptest_support = ["proptest"]

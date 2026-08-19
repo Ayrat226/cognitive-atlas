@@ -1,0 +1,24 @@
+[package]
+name = "lithos-rendering-vulkan"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+ash = { workspace = true }
+raw-window-handle = { workspace = true }
+bytemuck = { workspace = true }
+parking_lot = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-logging = { path = "../../engine/logging" }
+lithos-engine-profiler = { path = "../../engine/profiler" }
+lithos-engine-window = { path = "../../engine/window" }
+
+[features]
+default = []
+validation = []

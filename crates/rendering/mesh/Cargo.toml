@@ -1,0 +1,19 @@
+[package]
+name = "lithos-rendering-mesh"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+bytemuck = { workspace = true }
+parking_lot = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-math = { path = "../../engine/math" }
+lithos-engine-serialization = { path = "../../engine/serialization" }
+lithos-engine-logging = { path = "../../engine/logging" }
+lithos-simulation-voxel = { path = "../../simulation/voxel" }
+lithos-rendering-vulkan = { path = "../vulkan" }

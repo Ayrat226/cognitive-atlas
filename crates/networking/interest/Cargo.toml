@@ -1,0 +1,16 @@
+[package]
+name = "lithos-networking-interest"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-math = { path = "../../engine/math" }
+lithos-simulation-voxel = { path = "../../simulation/voxel" }
+lithos-simulation-aggregation = { path = "../../simulation/aggregation" }

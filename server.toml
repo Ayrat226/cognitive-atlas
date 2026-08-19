@@ -1,0 +1,95 @@
+# LITHOS Server Configuration
+
+[engine.memory]
+arena_size_mb = 128
+pool_block_sizes = [64, 128, 256, 512, 1024, 2048]
+enable_tracking = true
+
+[engine.jobs]
+num_threads = 15
+enable_profiling = true
+
+[engine.logging]
+level = "info"
+enable_memory_logging = true
+enable_console = false
+
+[engine.profiling]
+enable_tracy = true
+frame_history = 120
+
+[engine.window]
+title = "LITHOS Server"
+width = 800
+height = 600
+fullscreen = false
+vsync = false
+resizable = false
+samples = 1
+
+[engine.rendering]
+max_frames_in_flight = 1
+enable_validation = false
+enable_gpu_debug = false
+texture_quality = "Low"
+shadow_quality = "Off"
+
+[simulation]
+tick_rate = 20
+max_substeps = 4
+
+[simulation.voxel]
+chunk_size = 32
+region_size = 512
+max_loaded_chunks = 100000
+lod_distances = [96.0, 192.0, 384.0, 768.0]
+
+[simulation.materials]
+max_batches = 500000
+thermal_diffusion_enabled = true
+
+[simulation.processes]
+max_active_processes = 50000
+implicit_solve = true
+max_substeps = 4
+
+[simulation.logistics]
+fluid_solver_iterations = 20
+power_solver_tolerance = 1e-6
+item_batch_size = 64
+
+[simulation.aggregation]
+aggregate_distance = 500.0
+disaggregate_distance = 400.0
+update_interval_ticks = 100
+
+[simulation.worldgen]
+seed = 0
+generator_version = 1
+noise_octaves = 6
+noise_persistence = 0.5
+noise_lacunarity = 2.0
+
+[network.server]
+bind_address = "0.0.0.0"
+port = 7777
+tick_rate = 20
+max_players = 50
+bandwidth_limit_kbps = 50
+packet_loss_simulation = 0.0
+latency_simulation_ms = 0
+
+[network.client]
+server_address = "127.0.0.1"
+port = 7777
+interpolation = true
+prediction = true
+reconnect_attempts = 10
+reconnect_delay_ms = 1000
+
+[persistence]
+save_directory = "saves"
+auto_save_interval_secs = 60
+max_save_files = 20
+compression = "Lz4"
+verify_saves = true

@@ -1,0 +1,174 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  fmt:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Build workspace
+        run: cargo build --workspace --all-targets
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test --workspace --all-targets
+
+  test-x86_64:
+    name: Test (x86_64)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          target: x86_64-unknown-linux-gnu
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests (x86_64)
+        run: cargo test --workspace --target x86_64-unknown-linux-gnu
+
+  test-aarch64:
+    name: Test (aarch64 via qemu)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          target: aarch64-unknown-linux-gnu
+      - name: Install qemu
+        run: sudo apt-get update && sudo apt-get install -y qemu-user-static
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests (aarch64)
+        run: cargo test --workspace --target aarch64-unknown-linux-gnu
+
+  determinism:
+    name: Determinism Check
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Build deterministic test binary
+        run: cargo build --release --package lithos-engine-math --features proptest --example determinism_test
+      - name: Run determinism test (run 1)
+        run: ./target/release/examples/determinism_test > /tmp/run1.hash
+      - name: Run determinism test (run 2)
+        run: ./target/release/examples/determinism_test > /tmp/run2.hash
+      - name: Compare outputs
+        run: diff /tmp/run1.hash /tmp/run2.hash && echo "DETERMINISTIC: PASS" || (echo "DETERMINISTIC: FAIL" && exit 1)
+
+  bench:
+    name: Benchmarks
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Run benchmarks
+        run: cargo bench --workspace -- --save-baseline main
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: target/criterion/
+
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Run audit
+        run: cargo audit
+
+  outdated:
+    name: Check Outdated
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-outdated
+        run: cargo install cargo-outdated --locked
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Check outdated
+        run: cargo outdated --workspace --exit-code 1 || true
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+      - name: Build docs
+        run: cargo doc --workspace --no-deps --document-private-items
+      - name: Upload docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: target/doc/
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

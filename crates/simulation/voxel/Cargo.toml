@@ -1,0 +1,20 @@
+[package]
+name = "lithos-simulation-voxel"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+bitvec = { workspace = true }
+bytemuck = { workspace = true }
+parking_lot = { workspace = true }
+crossbeam = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-jobs = { path = "../../engine/jobs" }
+lithos-engine-math = { path = "../../engine/math" }
+lithos-engine-serialization = { path = "../../engine/serialization" }
+lithos-engine-logging = { path = "../../engine/logging" }

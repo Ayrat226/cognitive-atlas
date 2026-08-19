@@ -1,0 +1,38 @@
+[package]
+name = "lithos-app"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[[bin]]
+name = "lithos"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+lithos-engine-memory = { path = "../engine/memory" }
+lithos-engine-jobs = { path = "../engine/jobs" }
+lithos-engine-math = { path = "../engine/math" }
+lithos-engine-logging = { path = "../engine/logging" }
+lithos-engine-profiler = { path = "../engine/profiler" }
+lithos-engine-config = { path = "../engine/config" }
+lithos-engine-window = { path = "../engine/window" }
+lithos-engine-serialization = { path = "../engine/serialization" }
+lithos-simulation-voxel = { path = "../simulation/voxel" }
+lithos-simulation-materials = { path = "../simulation/materials" }
+lithos-simulation-worldgen = { path = "../simulation/worldgen" }
+lithos-rendering-vulkan = { path = "../rendering/vulkan" }
+lithos-rendering-mesh = { path = "../rendering/mesh" }
+lithos-rendering-materials = { path = "../rendering/materials" }
+lithos-rendering-lighting = { path = "../rendering/lighting" }
+lithos-rendering-post = { path = "../rendering/post" }
+lithos-game-player = { path = "../game/player" }
+lithos-game-ui = { path = "../game/ui" }
+lithos-persistence-world-save = { path = "../persistence/world_save" }
+lithos-persistence-player-save = { path = "../persistence/player_save" }

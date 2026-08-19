@@ -1,0 +1,21 @@
+[package]
+name = "lithos-game-ui"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+egui = "0.29"
+egui-winit = "0.29"
+egui-wgpu = "0.29"
+serde = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-logging = { path = "../../engine/logging" }
+lithos-game-player = { path = "../player" }
+lithos-game-inventory = { path = "../inventory" }
+lithos-game-crafting = { path = "../crafting" }
+lithos-game-research = { path = "../research" }

@@ -1,0 +1,51 @@
+[build]
+target-dir = "target"
+jobs = 8
+
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = [
+    "-C", "link-arg=-fuse-ld=lld",
+    "-C", "target-cpu=native",
+]
+
+[target.aarch64-unknown-linux-gnu]
+linker = "clang"
+rustflags = [
+    "-C", "link-arg=-fuse-ld=lld",
+]
+
+[target.wasm32-unknown-unknown]
+rustflags = [
+    "-C", "target-feature=+bulk-memory,+mutable-globals,+sign-ext",
+]
+
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.release-lto]
+inherits = "release"
+lto = "thin"
+
+[profile.dev]
+opt-level = 1
+debug = true
+overflow-checks = true
+
+[profile.test]
+opt-level = 2
+
+[alias]
+check = "check --workspace --all-targets"
+test = "test --workspace --all-targets"
+bench = "bench --workspace --all-targets"
+fmt = "fmt --all"
+clippy = "clippy --workspace --all-targets -- -D warnings"
+doc = "doc --workspace --no-deps --document-private-items"
+
+[env]
+RUST_BACKTRACE = "1"
+CARGO_TERM_COLOR = "always"

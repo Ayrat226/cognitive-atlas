@@ -1,0 +1,16 @@
+[package]
+name = "lithos-rendering-lighting"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+bytemuck = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-rendering-vulkan = { path = "../vulkan" }
+lithos-rendering-mesh = { path = "../mesh" }
+lithos-rendering-materials = { path = "../materials" }

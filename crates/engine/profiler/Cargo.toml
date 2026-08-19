@@ -1,0 +1,18 @@
+[package]
+name = "lithos-engine-profiler"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+tracy-client = { version = "0.17", optional = true }
+tracing = { workspace = true }
+lithos-engine-memory = { path = "../memory" }
+lithos-engine-jobs = { path = "../jobs" }
+
+[features]
+default = ["tracy"]
+tracy = ["tracy-client"]

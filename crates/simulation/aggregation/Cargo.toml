@@ -1,0 +1,21 @@
+[package]
+name = "lithos-simulation-aggregation"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+
+[dependencies]
+serde = { workspace = true }
+thiserror = { workspace = true }
+lithos-engine-memory = { path = "../../engine/memory" }
+lithos-engine-jobs = { path = "../../engine/jobs" }
+lithos-engine-math = { path = "../../engine/math" }
+lithos-engine-serialization = { path = "../../engine/serialization" }
+lithos-engine-logging = { path = "../../engine/logging" }
+lithos-simulation-voxel = { path = "../voxel" }
+lithos-simulation-materials = { path = "../materials" }
+lithos-simulation-processes = { path = "../processes" }
+lithos-simulation-logistics = { path = "../logistics" }
