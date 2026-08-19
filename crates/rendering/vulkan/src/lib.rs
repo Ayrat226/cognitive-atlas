@@ -1,10 +1,8 @@
-//! Placeholder module
+//! Vulkan rendering core for LITHOS
 
-/// Unit tests
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn placeholder() {
-        assert!(true);
-    }
-}
+pub mod vulkan_core;
+
+pub use vulkan_core::{
+    VulkanContext, VulkanError, Swapchain, FrameSync, CommandPool,
+    REQUIRED_INSTANCE_EXTENSIONS, REQUIRED_DEVICE_EXTENSIONS, VALIDATION_LAYERS,
+};

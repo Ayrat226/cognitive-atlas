@@ -1,10 +1,10 @@
-//! Placeholder module
+//! Mesh rendering pipeline for LITHOS
 
-/// Unit tests
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn placeholder() {
-        assert!(true);
-    }
-}
+pub mod mesh_pipeline;
+
+pub use mesh_pipeline::{
+    MeshPipeline, MeshPipeline,
+    MeshVertex, InstanceData, DrawIndexedIndirectCommand,
+    ChunkMeshBuffers, CullingPipeline, CullingConstants,
+    MeshError,
+};
