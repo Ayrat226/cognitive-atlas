@@ -459,6 +459,15 @@ impl Add for FixedVec3 {
     }
 }
 
+impl AddAssign for FixedVec3 {
+    #[inline]
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
+    }
+}
+
 impl Sub for FixedVec3 {
     type Output = Self;
     #[inline]
@@ -488,6 +497,14 @@ impl Neg for FixedVec3 {
     #[inline]
     fn neg(self) -> Self {
         Self::new(-self.x, -self.y, -self.z)
+    }
+}
+
+impl FixedVec3 {
+    /// Convert to f32 Vec3 (for rendering)
+    #[inline]
+    pub fn to_f32_vec3(self) -> crate::Vec3 {
+        crate::Vec3::new(self.x.to_f32(), self.y.to_f32(), self.z.to_f32())
     }
 }
 
