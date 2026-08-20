@@ -1,7 +1,0 @@
-/workspace/04a59888-d0e6-4c5e-b59f-5d934431fcc5/sessions/agent_1cca8499-4f36-455c-984b-e0803e6dac28/target/debug/deps/thread_local-f22decfa91bd3d3d.d: /home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/lib.rs /home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/cached.rs /home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/thread_id.rs
-
-/workspace/04a59888-d0e6-4c5e-b59f-5d934431fcc5/sessions/agent_1cca8499-4f36-455c-984b-e0803e6dac28/target/debug/deps/libthread_local-f22decfa91bd3d3d.rmeta: /home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/lib.rs /home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/cached.rs /home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/thread_id.rs
-
-/home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/lib.rs:
-/home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/cached.rs:
-/home/agent_1cca8499-4f36-455c-984b-e0803e6dac28/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/thread_local-1.1.10/src/thread_id.rs:

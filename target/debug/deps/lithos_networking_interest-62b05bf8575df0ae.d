@@ -1,5 +1,0 @@
-/workspace/04a59888-d0e6-4c5e-b59f-5d934431fcc5/sessions/agent_1cca8499-4f36-455c-984b-e0803e6dac28/target/debug/deps/lithos_networking_interest-62b05bf8575df0ae.d: crates/networking/interest/src/lib.rs
-
-/workspace/04a59888-d0e6-4c5e-b59f-5d934431fcc5/sessions/agent_1cca8499-4f36-455c-984b-e0803e6dac28/target/debug/deps/liblithos_networking_interest-62b05bf8575df0ae.rmeta: crates/networking/interest/src/lib.rs
-
-crates/networking/interest/src/lib.rs:

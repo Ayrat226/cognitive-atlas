@@ -1,1 +1,0 @@
-(dyn for<'a> Fn(&'a mut [u8], u32, u32) -> Result<(), SerializationError> + Send + Sync + 'static)
